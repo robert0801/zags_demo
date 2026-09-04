@@ -15,18 +15,18 @@ public class FillAdministratorDataPage extends BasePage {
     private final By lastNameInput = By.id("TextInputField-1");
     private final By firstNameInput = By.id("TextInputField-2");
     private final By middleNameInput = By.id("TextInputField-3");
-    private final By phoneNumberInput = By.cssSelector("[type='phone']");
+    private final By phoneNumberInput = By.xpath("//*[text()='Телефон']/../..//input");
     private final By passportInput = By.id("TextInputField-5");
     private final By birthdayInput = By.cssSelector("[type='date']");
     private final By nextBtn = By.xpath("//*[text()='Далее']");
 
     public void fillRegistrationData(AdminRegistrationDataDto data) {
-        fillLastNameInput(data.lastName());
-        fillFirstNameInput(data.firstName());
-        fillMiddleNameInput(data.middleName());
-        fillPhoneNumberInput(data.phone());
-        fillPassportInput(data.passport());
-        fillBirthdayInput(data.birthday());
+        fillLastNameInput(data.personalLastName());
+        fillFirstNameInput(data.personalFirstName());
+        fillMiddleNameInput(data.personalMiddleName());
+        fillPhoneNumberInput(data.personalPhoneNumber());
+        fillPassportInput(data.personalNumberOfPassport());
+        fillBirthdayInput(data.dateofbirth());
     }
 
     public void fillLastNameInput(String lastName) {

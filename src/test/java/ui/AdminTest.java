@@ -1,3 +1,5 @@
+package ui;
+
 import eu.senla.regoffice.models.AdminRegistrationDataDto;
 import eu.senla.regoffice.pages.RequestsPage;
 import eu.senla.regoffice.pages.StartApplicationPage;
@@ -10,7 +12,7 @@ import org.openqa.selenium.WebDriver;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-public class AdminTest {
+class AdminTest {
 
     private WebDriver driver;
 
@@ -20,7 +22,7 @@ public class AdminTest {
     }
 
     @Test
-    public void loginAsAdminTest() {
+    void loginAsAdminTest() {
         var randomAdminRegistrationDataDto = AdminRegistrationDataDto.getRandomAdminRegistrationData();
 
         var startApplicationPage = new StartApplicationPage(driver);

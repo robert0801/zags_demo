@@ -1,6 +1,7 @@
 package eu.senla.regoffice.pages;
 
 import eu.senla.regoffice.components.RequestsTableRow;
+import lombok.SneakyThrows;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
@@ -14,7 +15,9 @@ public class RequestsPage extends BasePage {
         super(driver);
     }
 
+    @SneakyThrows
     public List<RequestsTableRow> getRequestsTableRows() {
+        Thread.sleep(1000);
         return driver.findElements(row)
                 .stream().map(RequestsTableRow::new)
                 .toList();

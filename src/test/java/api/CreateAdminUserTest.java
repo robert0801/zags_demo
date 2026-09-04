@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class CreateAdminUserTest {
 
-    private AdminApiClient adminApiClient = new AdminApiClient();
+    private final AdminApiClient adminApiClient = new AdminApiClient();
 
     @Test
     void positiveCreateAdminUserTest() {

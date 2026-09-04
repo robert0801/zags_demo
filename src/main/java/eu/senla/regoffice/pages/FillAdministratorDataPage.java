@@ -50,8 +50,8 @@ public class FillAdministratorDataPage extends BasePage {
     }
 
     public void fillBirthdayInput(LocalDate birthday) {
-        driver.findElement(birthdayInput).sendKeys(String.valueOf(birthday.getDayOfMonth()));
-        driver.findElement(birthdayInput).sendKeys(String.valueOf(birthday.getMonthValue()));
+        driver.findElement(birthdayInput).sendKeys(String.format("%02d", birthday.getDayOfMonth()));
+        driver.findElement(birthdayInput).sendKeys(String.format("%02d", birthday.getMonthValue()));;
         driver.findElement(birthdayInput).sendKeys(String.valueOf(birthday.getYear()));
     }
 

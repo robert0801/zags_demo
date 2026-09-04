@@ -2,6 +2,7 @@ package eu.senla.regoffice.utils;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 
 public class WebDriverManagerUtil {
 
@@ -12,7 +13,14 @@ public class WebDriverManagerUtil {
 
     public static WebDriver getDriver() {
         if (driver == null) {
-            driver = new ChromeDriver();
+
+            ChromeOptions options = new ChromeOptions();
+            if (PropertyReader.isHeadless()) {
+                options.addArguments("--headless=new");
+                options.addArguments("--no-sandbox");
+                options.addArguments("--disable-dev-shm-usage");
+            }
+            driver = new ChromeDriver(options);
             driver.manage().window().maximize();
         }
         return driver;

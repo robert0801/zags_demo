@@ -1,4 +1,4 @@
-package api;
+package restassured_tests;
 
 import eu.senla.regoffice.client.AdminApiClient;
 import eu.senla.regoffice.models.AdminRegistrationDataDto;

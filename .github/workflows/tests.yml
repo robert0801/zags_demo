@@ -1,0 +1,183 @@
+name: Autotests
+
+on:
+  # Ручной запуск
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: Select test suite
+        required: true
+        default: all
+        type: choice
+        options:
+          - all
+          - RestAssuredSuite
+          - SeleniumSuite
+          - CucumberSuite
+
+  # Автоматический запуск каждый день в 02:00 UTC
+  schedule:
+    - cron: '0 2 * * *'
+
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+
+jobs:
+
+  tests:
+    name: Run tests
+    runs-on: ubuntu-latest
+
+    outputs:
+      test-result: ${{ steps.run-tests.outcome }}
+
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '25'
+
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+
+      - name: Make gradlew executable
+        run: chmod +x gradlew
+
+
+      - name: Setup Chrome
+        uses: browser-actions/setup-chrome@v2
+        with:
+          chrome-version: stable
+          install-chromedriver: true
+
+
+      - name: Run tests
+        id: run-tests
+        continue-on-error: true
+        shell: bash
+        run: |
+          # Scheduled запуск всегда запускает все тесты
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+
+            ./gradlew test -Dis.headless=true
+
+          # При ручном выборе "all" тоже запускаем все тесты
+          elif [ "${{ inputs.suite }}" = "all" ]; then
+
+            ./gradlew test -Dis.headless=true
+
+          # Иначе запускаем выбранный Suite-класс
+          else
+
+            ./gradlew test \
+              --tests "suites.${{ inputs.suite }}" \
+              -Dis.headless=true --stacktrace --info
+
+          fi
+
+
+      - name: Generate Allure report
+        if: always()
+        run: ./gradlew allureReport
+
+
+      - name: Upload Allure report
+        if: always()
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: build/reports/allure-report/allureReport
+
+
+  deploy:
+    name: Deploy Allure Report
+
+    needs: tests
+    if: always()
+
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    outputs:
+      page-url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v5
+
+
+      - name: Deploy Allure Report
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+
+  notification:
+    name: Send notification
+
+    needs:
+      - tests
+      - deploy
+
+    if: always()
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Send email
+      shell: bash
+      env:
+        RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+        MAIL_RECIPIENTS: ${{ vars.MAIL_RECIPIENTS }}
+        TEST_RESULT: ${{ needs.tests.outputs.test-result }}
+        REPORT_URL: ${{ needs.deploy.outputs.page-url }}
+      run: |
+        jq -n \
+          --argjson to "$MAIL_RECIPIENTS" \
+          --arg result "$TEST_RESULT" \
+          --arg report "$REPORT_URL" \
+          '{
+            from: "Autotests <onboarding@resend.dev>",
+            to: $to,
+            subject: ("Autotests result: " + $result),
+            text: ("Autotests finished.\n\nResult: " + $result + "\n\nAllure report: " + $report)
+          }' \
+        | curl --fail-with-body \
+            --request POST \
+            --url https://api.resend.com/emails \
+            --header "Authorization: Bearer $RESEND_API_KEY" \
+            --header "Content-Type: application/json" \
+            --data-binary @-
+
+
+  result:
+    name: Final result
+
+    needs:
+      - tests
+      - deploy
+      - notification
+
+    if: always()
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Fail workflow if tests failed
+        if: needs.tests.outputs.test-result == 'failure'
+        run: exit 1

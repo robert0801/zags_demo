@@ -1,4 +1,4 @@
-package ui;
+package selenium_tests;
 
 import eu.senla.regoffice.models.AdminRegistrationDataDto;
 import eu.senla.regoffice.pages.RequestsPage;
@@ -12,7 +12,7 @@ import org.openqa.selenium.WebDriver;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-class AdminTest {
+public class AdminTest {
 
     private WebDriver driver;
 

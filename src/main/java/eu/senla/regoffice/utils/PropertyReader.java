@@ -27,4 +27,8 @@ public class PropertyReader {
     public static String getPassword() {
         return prop.getProperty("password");
     }
+
+    public static boolean isHeadless() {
+        return prop.getProperty("is.headless").equals("true");
+    }
 }
